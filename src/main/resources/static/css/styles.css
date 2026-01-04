@@ -1,0 +1,61 @@
+:root {
+    --primary-color: #4CAF50; /* SDG Green */
+    --secondary-color: #FFC107; /* Soft Yellow - Zero Hunger */
+    --light-bg: #f8f9fa;
+    --dark-text: #343a40;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--light-bg);
+    color: var(--dark-text);
+}
+
+.navbar-custom {
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.brand-text {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.brand-text span {
+    color: var(--secondary-color);
+}
+
+.hero-section {
+    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('https://source.unsplash.com/1600x900/?food,vegetables');
+    background-size: cover;
+    padding: 60px 0;
+    text-align: center;
+    border-bottom: 5px solid var(--primary-color);
+}
+
+.card-custom {
+    border: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.card-custom:hover {
+    transform: translateY(-5px);
+}
+
+.btn-primary-custom {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary-custom:hover {
+    background-color: #45a049;
+    border-color: #45a049;
+}
+
+.status-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}

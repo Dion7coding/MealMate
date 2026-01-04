@@ -1,0 +1,7 @@
+/target
+/data
+/apache-maven-3.9.6
+/maven.zip
+/.vscode
+*.log
+.env

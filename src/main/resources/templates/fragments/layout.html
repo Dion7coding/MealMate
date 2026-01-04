@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' - MealMate'">MealMate</title>
+    <link rel="icon" type="image/png" th:href="@{/images/logo.png}">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <!-- Animate CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top" th:fragment="navbar">
+        <div class="container">
+            <a class="navbar-brand brand-text d-flex align-items-center" href="/">
+                <img th:src="@{/images/logo.png}" alt="Logo" width="30" height="30"
+                    class="d-inline-block align-text-top me-2 rounded-circle">
+                Meal<span>Mate</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i>Home</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item" th:if="${session.user == null}">
+                        <a class="nav-link" href="/login">Provide Food (Login)</a>
+                    </li>
+                    <li class="nav-item" th:if="${session.user != null && session.user.role.name() == 'PROVIDER'}">
+                        <a class="nav-link" href="/dashboard"><i class="fas fa-tachometer-alt me-1"></i>Dashboard</a>
+                    </li>
+                    <li class="nav-item" th:if="${session.user != null && session.user.role.name() == 'CONSUMER'}">
+                        <a class="nav-link" href="/profile"><i class="fas fa-user-circle me-1"></i>Profile</a>
+                    </li>
+                    <li class="nav-item" th:if="${session.user != null}">
+                        <span class="nav-link text-success fw-bold" th:text="${session.user.name}">Provider</span>
+                    </li>
+                    <li class="nav-item" th:if="${session.user != null}">
+                        <a class="nav-link text-danger" href="/logout"><i class="fas fa-sign-out-alt"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5" th:fragment="footer">
+        <div class="container text-center">
+            <div class="mb-3">
+                <i class="fas fa-utensils me-2"></i>
+                <i class="fas fa-globe-americas me-2"></i>
+                <i class="fas fa-hand-holding-heart"></i>
+            </div>
+            <p class="mb-1">&copy; 2024 MealMate. Aligned with <strong>SDG 2: Zero Hunger</strong> & <strong>SDG 12:
+                    Responsible Consumption</strong>.</p>
+            <small class="text-white-50">Reducing food waste, one meal at a time.</small>
+        </div>
+    </footer>
+</body>
+
+<!-- Bootstrap JS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

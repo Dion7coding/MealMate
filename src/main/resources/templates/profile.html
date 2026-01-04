@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/layout :: head(title='My Profile')}"></head>
+
+<body class="d-flex flex-column min-vh-100">
+
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container my-5 flex-grow-1">
+        <h2 class="mb-4">My Profile</h2>
+
+        <div class="row g-4">
+            <!-- User Details Card -->
+            <div class="col-md-4">
+                <div class="card shadow-sm custom-card">
+                    <div class="card-body text-center">
+                        <img th:src="@{https://ui-avatars.com/api/?name={name}(name=${user.name})}"
+                            class="rounded-circle mb-3" width="100" alt="Avatar">
+                        <h4 class="card-title" th:text="${user.name}">User Name</h4>
+                        <p class="text-muted" th:text="${user.role}">CONSUMER</p>
+                        <hr>
+                        <div class="text-start">
+                            <p><strong><i class="fas fa-envelope me-2"></i>Email:</strong> <span
+                                    th:text="${user.email}">user@example.com</span></p>
+                            <p><strong><i class="fas fa-phone me-2"></i>Phone:</strong> <span
+                                    th:text="${user.phoneNumber != null} ? ${user.phoneNumber} : 'Not set'">1234567890</span>
+                            </p>
+                            <p><strong><i class="fas fa-map-marker-alt me-2"></i>Address:</strong> <span
+                                    th:text="${user.address != null} ? ${user.address} : 'Not set'">123 Street</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Card -->
+                <div class="card shadow-sm custom-card mt-3">
+                    <div class="card-header bg-transparent border-0 fw-bold">Settings</div>
+                    <div class="card-body">
+                        <!-- Dark Mode Toggle -->
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="darkModeToggle">
+                            <label class="form-check-label" for="darkModeToggle">Dark Mode</label>
+                        </div>
+                        <button class="btn btn-outline-danger w-100">Reset Password</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History / Claimed Orders -->
+            <div class="col-md-8">
+                <div class="card shadow-sm custom-card">
+                    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Claimed Orders History</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div th:if="${claims.empty}" class="p-4 text-center text-muted">
+                            No orders claimed yet. Go to the <a href="/">Marketplace</a>!
+                        </div>
+                        <table class="table table-hover mb-0" th:unless="${claims.empty}">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Provider</th>
+                                    <th>Pickup Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="claim : ${claims}">
+                                    <td>
+                                        <strong th:text="${claim.itemName}">Soup</strong><br>
+                                        <small class="text-muted" th:text="${claim.quantity} + ' ' + ${claim.unit}">2
+                                            kg</small>
+                                    </td>
+                                    <td>
+                                        <span th:text="${claim.provider.name}">Restaurant A</span><br>
+                                        <small class="text-muted"><i class="fas fa-phone-alt"></i> <span
+                                                th:text="${claim.provider.email}">Contact</span></small>
+                                    </td>
+                                    <td th:text="${#temporals.format(claim.pickupTime, 'dd-MM-yyyy HH:mm')}">12-12-2024
+                                        14:00</td>
+                                    <td>
+                                        <form th:action="@{/profile/toggle-pickup/{id}(id=${claim.id})}" method="post">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox"
+                                                    onchange="this.form.submit()" th:checked="${claim.pickedUp}"
+                                                    th:id="'check' + ${claim.id}">
+                                                <label class="form-check-label" th:for="'check' + ${claim.id}"
+                                                    th:text="${claim.pickedUp ? 'Picked Up' : 'Pending'}">Pending</label>
+                                            </div>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Simple Dark Mode Logic
+        const toggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+
+        // Check local storage
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            body.classList.add('bg-dark', 'text-white');
+            toggle.checked = true;
+        }
+
+        toggle.addEventListener('change', () => {
+            if (toggle.checked) {
+                body.classList.add('bg-dark', 'text-white');
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                body.classList.remove('bg-dark', 'text-white');
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        });
+    </script>
+</body>
+
+</html>

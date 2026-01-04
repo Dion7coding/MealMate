@@ -1,0 +1,10 @@
+-- Insert Users (Password: password)
+INSERT INTO users (email, password, name, role) VALUES 
+('restaurant@example.com', 'XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=', 'Tasty Bites Restaurant', 'PROVIDER'),
+('bakery@example.com', 'XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=', 'Sweet Treats Bakery', 'PROVIDER');
+
+-- Insert Listings
+INSERT INTO food_listings (item_name, description, quantity, category, expiry_time, pickup_location, contact_number, status, provider_id) VALUES
+('Vegetable Curry', 'Fresh vegetable curry unused from lunch buffet', 5, 'Cooked Food', '2026-01-01 12:00:00', '123 Main St', '555-0101', 'Available', 1),
+('Sourdough Bread', 'Day old sourdough loaves', 10, 'Bakery', '2026-01-02 10:00:00', '456 Baker St', '555-0102', 'Available', 2),
+('Canned Soup', 'Excess inventory nearing best by date', 20, 'Groceries', '2026-02-01 09:00:00', '123 Main St', '555-0101', 'Available', 1);

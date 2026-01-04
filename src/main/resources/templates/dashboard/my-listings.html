@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/layout :: head(title='My Listings')}"></head>
+
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container flex-grow-1 py-5">
+
+        <!-- Dashboard Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold text-success">Provider Dashboard</h2>
+                <p class="text-muted">Welcome back, <span th:text="${user.name}">Provider</span>!</p>
+            </div>
+            <div>
+                <a href="/dashboard/add" class="btn btn-primary-custom btn-lg"><i
+                        class="fas fa-plus-circle me-2"></i>Add Listing</a>
+            </div>
+        </div>
+
+        <!-- Stats Card -->
+        <div class="row mb-5">
+            <div class="col-md-4">
+                <div class="card card-custom bg-white border-0 h-100 p-3">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="display-4 text-success me-3"><i class="fas fa-shopping-basket"></i></div>
+                        <div>
+                            <h5 class="card-title text-muted mb-0">Total Items Listed</h5>
+                            <h2 class="fw-bold mb-0" th:text="${totalItems}">0</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card card-custom bg-primary text-white border-0 h-100 p-3"
+                    style="background: linear-gradient(to right, #4CAF50, #8BC34A);">
+                    <div class="card-body">
+                        <h4 class="card-title"><i class="fas fa-hands-helping me-2"></i>Thank you for your contribution!
+                        </h4>
+                        <p class="card-text">Every item you list helps reduce food waste and feeds someone in need. You
+                            are making a difference towards SDG 2.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Listings Table -->
+        <h4 class="fw-bold mb-3">Your Active Listings</h4>
+        <div class="card border-0 shadow-sm mb-5">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="bg-light">
+                            <tr>
+                                <th scope="col" class="ps-4">Item Name</th>
+                                <th scope="col">Category</th>
+                                <th scope="col">Quantity</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Expiry</th>
+                                <th scope="col" class="text-end pe-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="listing : ${availableListings}">
+                                <td class="ps-4 fw-bold" th:text="${listing.itemName}">Item Name</td>
+                                <td><span class="badge bg-secondary" th:text="${listing.category}">Category</span></td>
+                                <td th:text="${listing.quantity} + ' ' + ${listing.unit}">1 units</td>
+                                <td
+                                    th:text="${listing.currency} + ' ' + ${listing.discountedPrice != null ? listing.discountedPrice : listing.price}">
+                                    Price</td>
+                                <td th:text="${#temporals.format(listing.expiryTime, 'dd-MM-yyyy HH:mm')}">Time</td>
+                                <td class="text-end pe-4">
+                                    <a th:href="@{/dashboard/edit/{id}(id=${listing.id})}"
+                                        class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></a>
+                                    <a th:href="@{/dashboard/delete/{id}(id=${listing.id})}"
+                                        class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Are you sure you want to delete this listing?');"><i
+                                            class="fas fa-trash"></i></a>
+                                </td>
+                            </tr>
+                            <tr th:if="${availableListings.empty}">
+                                <td colspan="6" class="text-center py-4 text-muted">No active listings.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Claimed Items Section -->
+        <h4 class="fw-bold mb-3">Claimed Items History</h4>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-warning">
+                            <tr>
+                                <th scope="col" class="ps-4">Item</th>
+                                <th scope="col">Claimed By</th>
+                                <th scope="col">Consumer Phone</th>
+                                <th scope="col">Pickup Time</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="listing : ${claimedListings}">
+                                <td class="ps-4">
+                                    <strong th:text="${listing.itemName}">Item</strong><br>
+                                    <small class="text-muted" th:text="${listing.quantity} + ' ' + ${listing.unit}">2
+                                        kg</small>
+                                </td>
+                                <td>
+                                    <span th:text="${listing.claimedBy.name}">User</span><br>
+                                    <small class="text-muted" th:text="${listing.claimedBy.email}">email</small>
+                                </td>
+                                <td th:text="${listing.claimerPhoneNumber}">123-456-7890</td>
+                                <td th:text="${#temporals.format(listing.pickupTime, 'dd-MM-yyyy HH:mm')}">Time</td>
+                                <td>
+                                    <span th:if="${listing.pickedUp}" class="badge bg-success">Picked Up</span>
+                                    <span th:unless="${listing.pickedUp}" class="badge bg-warning text-dark">Pending
+                                        Pickup</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${claimedListings.empty}">
+                                <td colspan="5" class="text-center py-4 text-muted">No items have been claimed yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
