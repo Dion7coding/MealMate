@@ -21,27 +21,46 @@
             </div>
         </div>
 
-        <!-- Stats Card -->
+        <!-- Stats Card & UPI Settings -->
         <div class="row mb-5">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card card-custom bg-white border-0 h-100 p-3">
                     <div class="card-body d-flex align-items-center">
                         <div class="display-4 text-success me-3"><i class="fas fa-shopping-basket"></i></div>
                         <div>
-                            <h5 class="card-title text-muted mb-0">Total Items Listed</h5>
+                            <h5 class="card-title text-muted mb-0 small">Items Listed</h5>
                             <h2 class="fw-bold mb-0" th:text="${totalItems}">0</h2>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-4">
+                <div class="card card-custom bg-white border-0 h-100 p-3">
+                    <div class="card-body">
+                        <h6 class="card-title fw-bold mb-2">UPI Payment Scanner</h6>
+                        <form action="/dashboard/update-upi" method="post" enctype="multipart/form-data" class="mb-2">
+                            <input type="file" name="upiFile" class="form-control form-control-sm mb-2" accept="image/*"
+                                required>
+                            <button type="submit" class="btn btn-sm btn-success w-100">Upload QR Code</button>
+                        </form>
+                        <div th:if="${user.upiQrCode != null}" class="text-center mt-2">
+                            <small class="text-success"><i class="fas fa-check-circle"></i> QR Code Active</small>
+                            <img th:src="${user.upiQrCode}" style="height: 40px;" class="ms-2 border rounded"
+                                alt="QR Preview">
+                        </div>
+                        <div th:if="${user.upiQrCode == null}" class="text-center mt-2">
+                            <small class="text-danger"><i class="fas fa-times-circle"></i> No QR Uploaded</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5">
                 <div class="card card-custom bg-primary text-white border-0 h-100 p-3"
                     style="background: linear-gradient(to right, #4CAF50, #8BC34A);">
                     <div class="card-body">
-                        <h4 class="card-title"><i class="fas fa-hands-helping me-2"></i>Thank you for your contribution!
-                        </h4>
-                        <p class="card-text">Every item you list helps reduce food waste and feeds someone in need. You
-                            are making a difference towards SDG 2.</p>
+                        <h5 class="card-title fw-bold">Impact Summary</h5>
+                        <p class="card-text small">Your contributions help reach SDG 2 (Zero Hunger) and SDG 12
+                            (Responsible Consumption). Keep it up!</p>
                     </div>
                 </div>
             </div>

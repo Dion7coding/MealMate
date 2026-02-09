@@ -4,21 +4,53 @@ import com.mealmate.dto.FoodListingDto;
 import com.mealmate.model.FoodListing;
 import com.mealmate.model.User;
 import com.mealmate.service.FoodListingService;
+import com.mealmate.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/dashboard")
 public class DashboardController {
 
     private final FoodListingService foodListingService;
+    private final UserService userService;
+    private static final String UPLOAD_DIR = "src/main/resources/static/uploads/";
 
-    public DashboardController(FoodListingService foodListingService) {
+    public DashboardController(FoodListingService foodListingService, UserService userService) {
         this.foodListingService = foodListingService;
+        this.userService = userService;
+    }
+
+    @PostMapping("/update-upi")
+    public String updateUpi(@RequestParam("upiFile") MultipartFile file, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null)
+            return "redirect:/login";
+
+        if (!file.isEmpty()) {
+            try {
+                String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+                Path path = Paths.get(UPLOAD_DIR + fileName);
+                Files.createDirectories(path.getParent());
+                Files.write(path, file.getBytes());
+
+                User updatedUser = userService.updateUpiQrCode(user.getId(), "/uploads/" + fileName);
+                session.setAttribute("user", updatedUser);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return "redirect:/dashboard";
     }
 
     @GetMapping
@@ -70,7 +102,6 @@ public class DashboardController {
             return "redirect:/login";
 
         FoodListing listing = foodListingService.getListing(id);
-        // Simple security check
         if (!listing.getProvider().getId().equals(user.getId())) {
             return "redirect:/dashboard";
         }
@@ -84,6 +115,10 @@ public class DashboardController {
         dto.setPickupLocation(listing.getPickupLocation());
         dto.setContactNumber(listing.getContactNumber());
         dto.setExpiryTimeStr(listing.getExpiryTime().toString());
+        dto.setUnit(listing.getUnit());
+        dto.setPrice(listing.getPrice());
+        dto.setDiscountedPrice(listing.getDiscountedPrice());
+        dto.setCurrency(listing.getCurrency());
 
         model.addAttribute("listingDto", dto);
         return "dashboard/add-listing";

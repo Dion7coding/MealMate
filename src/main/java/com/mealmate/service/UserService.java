@@ -50,6 +50,29 @@ public class UserService {
         return null;
     }
 
+    public User updateProfile(Long userId, String phoneNumber, String address) {
+        if (userId == null)
+            throw new IllegalArgumentException("ID cannot be null");
+        User user = userRepository.findById(userId).orElseThrow();
+        user.setPhoneNumber(phoneNumber);
+        user.setAddress(address);
+        return userRepository.save(user);
+    }
+
+    public User updateUpiQrCode(Long userId, String filePath) {
+        if (userId == null)
+            throw new IllegalArgumentException("ID cannot be null");
+        User user = userRepository.findById(userId).orElseThrow();
+        user.setUpiQrCode(filePath);
+        return userRepository.save(user);
+    }
+
+    public User findById(Long id) {
+        if (id == null)
+            throw new IllegalArgumentException("ID cannot be null");
+        return userRepository.findById(id).orElseThrow();
+    }
+
     private String hashPassword(String password) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

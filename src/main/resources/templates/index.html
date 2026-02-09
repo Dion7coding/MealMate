@@ -100,44 +100,83 @@
                     th:if="${session.user != null}">
                     <div class="modal-dialog">
                         <div class="modal-content">
-                            <form action="/claim" method="post">
+                            <form action="/requests/create" method="post">
                                 <div class="modal-header">
-                                    <h5 class="modal-title">Claim <span th:text="${listing.itemName}">Item</span></h5>
+                                    <h5 class="modal-title">Request Pickup for <span
+                                            th:text="${listing.itemName}">Item</span></h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                                         aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <input type="hidden" name="id" th:value="${listing.id}">
-                                    <p class="mb-2">How much?</p>
-                                    <div class="input-group mb-3">
+                                    <input type="hidden" name="foodListingId" th:value="${listing.id}">
+
+                                    <p class="text-info small mb-3"><i class="fas fa-info-circle"></i> This will send a
+                                        request to the provider for approval.</p>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Quantity to Claim (<span
+                                                th:text="${listing.unit}">units</span>)</label>
                                         <input type="number" name="quantity" class="form-control" min="1"
                                             th:max="${listing.quantity}" th:value="${listing.quantity}" required>
-                                        <span class="input-group-text" th:text="${listing.unit}">units</span>
+                                        <small class="text-muted">Available: <span
+                                                th:text="${listing.quantity}"></span></small>
                                     </div>
 
-                                    <p class="mb-2">Your Phone Number</p>
-                                    <div class="input-group mb-3">
-                                        <input type="tel" name="phoneNumber" class="form-control"
-                                            placeholder="123-456-7890" required>
-                                    </div>
-
-                                    <p class="mb-2">Pickup Time</p>
-                                    <div class="form-group mb-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">Ideal Pickup Time</label>
                                         <input type="datetime-local" name="pickupTime" class="form-control" required
                                             th:min="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd''T''HH:mm')}"
                                             th:max="${#temporals.format(listing.expiryTime, 'yyyy-MM-dd''T''HH:mm')}">
                                         <small class="text-muted">Must be before <span
-                                                th:text="${#temporals.format(listing.expiryTime, 'dd-MM-yyyy HH:mm')}">Expiry</span></small>
+                                                th:text="${#temporals.format(listing.expiryTime, 'dd-MM-yyyy HH:mm')}">expiry</span>.</small>
                                     </div>
 
-                                    <small class="text-muted">Available: <span th:text="${listing.quantity}">10</span>
-                                        <span th:text="${listing.unit}">units</span></small>
+                                    <div class="mb-3">
+                                        <label class="form-label">Payment Method</label>
+                                        <select name="paymentType" class="form-select" required>
+                                            <option value="COLLECTION">Pay at Collection</option>
+                                            <option value="UPI">Pay via UPI (Restaurant's Scanner)</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Remarks (Optional)</label>
+                                        <textarea name="remarks" class="form-control"
+                                            placeholder="e.g. I can pick up after 5 PM." rows="2"></textarea>
+                                    </div>
+
+                                    <div class="bg-light p-2 rounded"
+                                        th:if="${listing.price != null || listing.discountedPrice != null}">
+                                        <small class="text-muted">Total Price: <strong
+                                                th:id="'totalPrice' + ${listing.id}"
+                                                th:text="${(listing.currency ?: 'USD') + ' ' + (listing.discountedPrice != null ? (listing.discountedPrice.doubleValue() * (listing.quantity ?: 0)) : (listing.price != null ? (listing.price.doubleValue() * (listing.quantity ?: 0)) : '0.00'))}">
+                                            </strong></small>
+                                    </div>
                                 </div>
-                                <div class="modal-footer">
+                                <div class="modal-footer border-0">
                                     <button type="button" class="btn btn-secondary"
                                         data-bs-dismiss="modal">Cancel</button>
-                                    <button type="submit" class="btn btn-success">Confirm Claim</button>
+                                    <button type="submit" class="btn btn-primary px-4">Send Request</button>
                                 </div>
+                                <script th:inline="javascript">
+                                    /*<![CDATA[*/
+                                    (function () {
+                                        const listingId = /*[[${listing.id}]]*/ 0;
+                                        const unitPrice = /*[[${listing.discountedPrice != null ? listing.discountedPrice.doubleValue() : (listing.price != null ? listing.price.doubleValue() : 0.0)}]]*/ 0;
+                                        const currency = /*[[${listing.currency}]]*/ 'USD';
+
+                                        const qtyInput = document.querySelector(`#claimModal${listingId} input[name="quantity"]`);
+                                        const totalDisplay = document.querySelector(`#totalPrice${listingId}`);
+
+                                        if (qtyInput && totalDisplay) {
+                                            qtyInput.addEventListener('input', function () {
+                                                const total = (this.value * unitPrice).toFixed(2);
+                                                totalDisplay.textContent = `${currency} ${total}`;
+                                            });
+                                        }
+                                    })();
+                                    /*]]>*/
+                                </script>
                             </form>
                         </div>
                     </div>

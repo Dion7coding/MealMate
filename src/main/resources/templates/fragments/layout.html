@@ -37,16 +37,25 @@
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item" th:if="${session.user == null}">
-                        <a class="nav-link" href="/login">Provide Food (Login)</a>
+                        <a class="nav-link fw-bold text-success" href="/register">Join Now (Register)</a>
+                    </li>
+                    <li class="nav-item" th:if="${session.user == null}">
+                        <a class="nav-link" href="/login">Login</a>
+                    </li>
+                    <li class="nav-item" th:if="${session.user != null && session.user.role.name() == 'PROVIDER'}">
+                        <a class="nav-link" href="/requests/provider"><i class="fas fa-inbox me-1"></i>Requests</a>
                     </li>
                     <li class="nav-item" th:if="${session.user != null && session.user.role.name() == 'PROVIDER'}">
                         <a class="nav-link" href="/dashboard"><i class="fas fa-tachometer-alt me-1"></i>Dashboard</a>
+                    </li>
+                    <li class="nav-item" th:if="${session.user != null}">
+                        <a class="nav-link" href="/notifications"><i class="fas fa-bell me-1"></i>Notifications</a>
                     </li>
                     <li class="nav-item" th:if="${session.user != null && session.user.role.name() == 'CONSUMER'}">
                         <a class="nav-link" href="/profile"><i class="fas fa-user-circle me-1"></i>Profile</a>
                     </li>
                     <li class="nav-item" th:if="${session.user != null}">
-                        <span class="nav-link text-success fw-bold" th:text="${session.user.name}">Provider</span>
+                        <span class="nav-link text-success fw-bold" th:text="${session.user.name}">User</span>
                     </li>
                     <li class="nav-item" th:if="${session.user != null}">
                         <a class="nav-link text-danger" href="/logout"><i class="fas fa-sign-out-alt"></i></a>
@@ -69,11 +78,9 @@
             <small class="text-white-50">Reducing food waste, one meal at a time.</small>
         </div>
     </footer>
-</body>
 
-<!-- Bootstrap JS -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

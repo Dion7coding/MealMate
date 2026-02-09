@@ -8,62 +8,158 @@
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container my-5 flex-grow-1">
-        <h2 class="mb-4">My Profile</h2>
-
-        <div class="row g-4">
-            <!-- User Details Card -->
+        <div class="row">
+            <!-- User Info Card -->
             <div class="col-md-4">
-                <div class="card shadow-sm custom-card">
-                    <div class="card-body text-center">
-                        <img th:src="@{https://ui-avatars.com/api/?name={name}(name=${user.name})}"
-                            class="rounded-circle mb-3" width="100" alt="Avatar">
-                        <h4 class="card-title" th:text="${user.name}">User Name</h4>
-                        <p class="text-muted" th:text="${user.role}">CONSUMER</p>
-                        <hr>
-                        <div class="text-start">
-                            <p><strong><i class="fas fa-envelope me-2"></i>Email:</strong> <span
-                                    th:text="${user.email}">user@example.com</span></p>
-                            <p><strong><i class="fas fa-phone me-2"></i>Phone:</strong> <span
-                                    th:text="${user.phoneNumber != null} ? ${user.phoneNumber} : 'Not set'">1234567890</span>
-                            </p>
-                            <p><strong><i class="fas fa-map-marker-alt me-2"></i>Address:</strong> <span
-                                    th:text="${user.address != null} ? ${user.address} : 'Not set'">123 Street</span>
-                            </p>
+                <div class="card shadow-sm custom-card text-center p-4">
+                    <div class="mb-3">
+                        <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center shadow"
+                            style="width: 80px; height: 80px; font-size: 2rem;">
+                            <span
+                                th:text="${user.name != null && !user.name.isEmpty() ? user.name.substring(0,1) : 'U'}">U</span>
                         </div>
+                    </div>
+                    <h4 th:text="${user.name}">User Name</h4>
+                    <p class="text-muted mb-1" th:text="${user.email}">user@example.com</p>
+                    <span class="badge bg-info text-dark mb-3" th:text="${user.role}">CONSUMER</span>
+                    <hr>
+                    <div class="text-start">
+                        <small class="text-muted d-block">Phone Number</small>
+                        <p class="mb-3 fw-bold" th:text="${user.phoneNumber ?: 'No phone set'}">+123456789</p>
+
+                        <small class="text-muted d-block">Saved Address</small>
+                        <p class="mb-0 fw-bold" th:text="${user.address ?: 'No address set'}">123 Green Blvd, Veggie
+                            City
+                        </p>
                     </div>
                 </div>
 
-                <!-- Settings Card -->
+                <!-- Update Details Card -->
                 <div class="card shadow-sm custom-card mt-3">
-                    <div class="card-header bg-transparent border-0 fw-bold">Settings</div>
+                    <div class="card-header bg-transparent border-0 fw-bold">Update Personal Details</div>
                     <div class="card-body">
-                        <!-- Dark Mode Toggle -->
-                        <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" type="checkbox" id="darkModeToggle">
-                            <label class="form-check-label" for="darkModeToggle">Dark Mode</label>
-                        </div>
-                        <button class="btn btn-outline-danger w-100">Reset Password</button>
+                        <form action="/profile/update-details" method="post">
+                            <div class="mb-3">
+                                <label class="small fw-bold">Phone Number</label>
+                                <input type="tel" name="phoneNumber" class="form-control form-control-sm"
+                                    th:value="${user.phoneNumber}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="small fw-bold">Address</label>
+                                <textarea name="address" class="form-control form-control-sm" rows="2" required
+                                    th:text="${user.address}"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm w-100">Save Changes</button>
+                        </form>
                     </div>
                 </div>
             </div>
 
-            <!-- History / Claimed Orders -->
+            <!-- History / Requests -->
             <div class="col-md-8">
+                <!-- Pickup Requests Section -->
+                <div class="card shadow-sm custom-card mb-4" th:if="${requests != null && !requests.empty}">
+                    <div class="card-header bg-transparent border-0 fw-bold">My Pickup Requests</div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Status</th>
+                                    <th>Payment</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="req : ${requests}">
+                                    <td>
+                                        <strong th:text="${req.foodListing.itemName}"></strong><br>
+                                        <small class="text-muted"
+                                            th:text="${req.quantity} + ' ' + ${req.foodListing.unit}"></small>
+                                    </td>
+                                    <td>
+                                        <span class="badge"
+                                            th:classappend="${req.status.name() == 'PENDING' ? 'bg-warning' : (req.status.name() == 'APPROVED' ? 'bg-success' : 'bg-danger')}"
+                                            th:text="${req.status}"></span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${req.paymentType.name() == 'COLLECTION'}"
+                                            class="text-muted small">Pay at Collection</span>
+                                        <div th:if="${req.paymentType.name() == 'UPI'}">
+                                            <span th:if="${req.paymentStatus.name() == 'PAID'}"
+                                                class="badge bg-success">Paid</span>
+                                            <span th:if="${req.paymentStatus.name() == 'PENDING'}"
+                                                class="badge bg-info text-dark">UPI (Pend)</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div
+                                            th:if="${req.status.name() == 'APPROVED' && req.paymentType.name() == 'UPI' && req.paymentStatus.name() == 'PENDING'}">
+                                            <button class="btn btn-sm btn-info" data-bs-toggle="modal"
+                                                th:data-bs-target="'#upiModal' + ${req.id}">
+                                                Pay Now
+                                            </button>
+                                        </div>
+
+                                        <!-- UPI Modal -->
+                                        <div class="modal fade" th:id="'upiModal' + ${req.id}" tabindex="-1">
+                                            <div class="modal-dialog modal-sm">
+                                                <div class="modal-content text-dark">
+                                                    <div class="modal-header py-2">
+                                                        <h6 class="modal-title">Scan & Pay</h6>
+                                                        <button type="button" class="btn-close"
+                                                            data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body text-center">
+                                                        <div class="mb-3 p-2 bg-light rounded"
+                                                            th:if="${req.foodListing.price != null || req.foodListing.discountedPrice != null}">
+                                                            <small class="text-muted d-block">Total to Pay</small>
+                                                            <h5 class="fw-bold mb-0"
+                                                                th:text="${(req.foodListing.currency ?: 'USD') + ' ' + ((req.quantity != null ? req.quantity : 0) * (req.foodListing.discountedPrice != null ? req.foodListing.discountedPrice.doubleValue() : (req.foodListing.price != null ? req.foodListing.price.doubleValue() : 0.0)))}">
+                                                                USD 0.00</h5>
+                                                        </div>
+                                                        <img th:if="${req.foodListing.provider.upiQrCode != null}"
+                                                            th:src="${req.foodListing.provider.upiQrCode}"
+                                                            class="img-fluid mb-3 rounded border" alt="UPI QR">
+                                                        <div th:if="${req.foodListing.provider.upiQrCode == null}"
+                                                            class="alert alert-warning py-1 small">
+                                                            Provider hasn't uploaded a UPI QR yet.
+                                                        </div>
+                                                        <form action="/requests/update-payment" method="post"
+                                                            th:if="${req.foodListing.provider.upiQrCode != null}">
+                                                            <input type="hidden" name="requestId" th:value="${req.id}">
+                                                            <input type="hidden" name="status" value="PAID">
+                                                            <button type="submit"
+                                                                class="btn btn-success btn-sm w-100">Confirm
+                                                                Payment</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Claimed Orders History -->
                 <div class="card shadow-sm custom-card">
                     <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Claimed Orders History</h5>
                     </div>
                     <div class="card-body p-0">
-                        <div th:if="${claims.empty}" class="p-4 text-center text-muted">
+                        <div th:if="${claims == null || claims.empty}" class="p-4 text-center text-muted">
                             No orders claimed yet. Go to the <a href="/">Marketplace</a>!
                         </div>
-                        <table class="table table-hover mb-0" th:unless="${claims.empty}">
+                        <table class="table table-hover mb-0" th:if="${claims != null && !claims.empty}">
                             <thead class="table-light">
                                 <tr>
                                     <th>Item</th>
                                     <th>Provider</th>
                                     <th>Pickup Time</th>
-                                    <th>Status</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -81,15 +177,66 @@
                                     <td th:text="${#temporals.format(claim.pickupTime, 'dd-MM-yyyy HH:mm')}">12-12-2024
                                         14:00</td>
                                     <td>
-                                        <form th:action="@{/profile/toggle-pickup/{id}(id=${claim.id})}" method="post">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox"
-                                                    onchange="this.form.submit()" th:checked="${claim.pickedUp}"
-                                                    th:id="'check' + ${claim.id}">
-                                                <label class="form-check-label" th:for="'check' + ${claim.id}"
-                                                    th:text="${claim.pickedUp ? 'Picked Up' : 'Pending'}">Pending</label>
+                                        <div class="d-flex align-items-center">
+                                            <form th:action="@{/profile/toggle-pickup/{id}(id=${claim.id})}"
+                                                method="post" class="me-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        onchange="this.form.submit()" th:checked="${claim.pickedUp}"
+                                                        th:id="'check' + ${claim.id}">
+                                                    <label class="form-check-label small" th:for="'check' + ${claim.id}"
+                                                        th:text="${claim.pickedUp ? 'Picked Up' : 'Pending'}">Pending</label>
+                                                </div>
+                                            </form>
+
+                                            <button th:if="${claim.pickedUp}" class="btn btn-sm btn-outline-warning"
+                                                data-bs-toggle="modal"
+                                                th:data-bs-target="'#feedbackModal' + ${claim.id}"
+                                                title="Rate Provider">
+                                                <i class="fas fa-star"></i>
+                                            </button>
+                                        </div>
+
+                                        <!-- Feedback Modal -->
+                                        <div class="modal fade" th:id="'feedbackModal' + ${claim.id}" tabindex="-1"
+                                            th:if="${claim.pickedUp}">
+                                            <div class="modal-dialog modal-sm">
+                                                <div class="modal-content text-dark">
+                                                    <form action="/feedback/submit" method="post">
+                                                        <div class="modal-header py-2">
+                                                            <h6 class="modal-title">Rate Experience</h6>
+                                                            <button type="button" class="btn-close"
+                                                                data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <input type="hidden" name="foodListingId"
+                                                                th:value="${claim.id}">
+                                                            <div class="mb-2">
+                                                                <label class="small fw-bold">Rating</label>
+                                                                <select name="rating"
+                                                                    class="form-select form-select-sm">
+                                                                    <option value="5">5/5 - Perfect</option>
+                                                                    <option value="4">4/5 - Great</option>
+                                                                    <option value="3">3/5 - Okay</option>
+                                                                    <option value="2">2/5 - Poor</option>
+                                                                    <option value="1">1/5 - Bad</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <label class="small fw-bold">Comment</label>
+                                                                <textarea name="comment"
+                                                                    class="form-control form-control-sm" rows="2"
+                                                                    placeholder="Optional"></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer py-2">
+                                                            <button type="submit"
+                                                                class="btn btn-sm btn-primary w-100">Submit</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
                                             </div>
-                                        </form>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -101,30 +248,7 @@
     </div>
 
     <footer th:replace="~{fragments/layout :: footer}"></footer>
-
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Simple Dark Mode Logic
-        const toggle = document.getElementById('darkModeToggle');
-        const body = document.body;
-
-        // Check local storage
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            body.classList.add('bg-dark', 'text-white');
-            toggle.checked = true;
-        }
-
-        toggle.addEventListener('change', () => {
-            if (toggle.checked) {
-                body.classList.add('bg-dark', 'text-white');
-                localStorage.setItem('darkMode', 'enabled');
-            } else {
-                body.classList.remove('bg-dark', 'text-white');
-                localStorage.setItem('darkMode', 'disabled');
-            }
-        });
-    </script>
 </body>
 
 </html>

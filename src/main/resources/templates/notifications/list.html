@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/layout :: head(title='Notifications')}"></head>
+
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container py-5 flex-grow-1">
+        <h2 class="mb-4">Notifications</h2>
+
+        <div class="card shadow-sm">
+            <div class="list-group list-group-flush">
+                <div th:each="notification : ${notifications}"
+                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-start"
+                    th:classappend="${!notification.read} ? 'bg-light border-start border-primary border-4' : ''">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold" th:text="${notification.type}">Type</div>
+                        <span th:text="${notification.message}">Message content</span>
+                        <br>
+                        <small class="text-muted"
+                            th:text="${#temporals.format(notification.createdAt, 'dd-MM-yyyy HH:mm')}">Date</small>
+                    </div>
+                    <button th:if="${!notification.read}" th:onclick="'markAsRead(' + ${notification.id} + ')'"
+                        class="btn btn-sm btn-outline-secondary">Mark Read</button>
+                </div>
+                <div th:if="${notifications.empty}" class="p-4 text-center text-muted">
+                    No notifications at this time.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    <script>
+        function markAsRead(id) {
+            fetch('/notifications/mark-read/' + id, { method: 'POST' })
+                .then(response => { if (response.ok) location.reload(); });
+        }
+    </script>
+</body>
+
+</html>

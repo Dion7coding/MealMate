@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/layout :: head(title='Pickup Requests')}"></head>
+
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container py-5 flex-grow-1">
+        <h2 class="mb-4">Pending Pickup Requests</h2>
+
+        <div class="card shadow-sm border-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Item</th>
+                            <th>Consumer</th>
+                            <th>Proposed Pickup</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="req : ${requests}">
+                            <td class="ps-4">
+                                <span class="fw-bold" th:text="${req.foodListing.itemName}">Item</span><br>
+                                <small class="text-muted"
+                                    th:text="${req.quantity} + ' ' + ${req.foodListing.unit}">Qty</small>
+                            </td>
+                            <td>
+                                <span th:text="${req.consumer.name}">User</span><br>
+                                <small class="text-muted"><i class="fas fa-phone"></i> <span
+                                        th:text="${req.consumer.phoneNumber ?: 'No Phone'}">No Phone</span></small><br>
+                                <small class="text-muted" th:text="${req.consumer.email}">Email</small>
+                            </td>
+                            <td th:text="${#temporals.format(req.pickupTime, 'dd-MM-yyyy HH:mm')}">Time</td>
+                            <td>
+                                <span th:text="${req.status}" class="badge"
+                                    th:classappend="${req.status.name() == 'PENDING' ? 'bg-warning text-dark' : (req.status.name() == 'APPROVED' ? 'bg-success' : 'bg-danger')}">
+                                    Status
+                                </span><br>
+                                <small class="text-muted small" th:text="${req.paymentType}"></small>
+                                <small th:if="${req.paymentType.name() == 'UPI'}" class="badge bg-info text-dark"
+                                    th:text="${req.paymentStatus}">PENDING</small>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div th:if="${req.status.name() == 'PENDING'}">
+                                    <form th:action="@{/requests/update-status}" method="post" class="d-inline">
+                                        <input type="hidden" name="requestId" th:value="${req.id}">
+                                        <input type="hidden" name="status" value="APPROVED">
+                                        <button class="btn btn-sm btn-success">Approve</button>
+                                    </form>
+                                    <form th:action="@{/requests/update-status}" method="post" class="d-inline">
+                                        <input type="hidden" name="requestId" th:value="${req.id}">
+                                        <input type="hidden" name="status" value="REJECTED">
+                                        <button class="btn btn-sm btn-outline-danger">Reject</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${requests.empty}">
+                            <td colspan="5" class="text-center py-5 text-muted">No pending requests found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+
+</html>
